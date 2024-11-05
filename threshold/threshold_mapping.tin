@@ -26,25 +26,23 @@
 #alias {se} {g southeast}
 
 #alias {g} {
-  #showme {going %0};
   #variable {moving} {1}; 
   #variable {direction} {%0}; 
   go %0;
-  #showme {gone %0};
 }
 
+#debug action on;
 #variable {moving} {0};
 
-#act {~\e[38;%d;%dm%1\e[0m{([^\0]*?)}{Obvious exits are |The only obvious exits are }{(.*?)}\n} {
+#act {~\e[38;{([^\0]*?)}\n\e[0m} {
   #if {$moving == 1} {
-    #variable {roomname} {%1};
-    #variable {roomdesc} {%2};
-    #variable {exits} {%4};
-    #replace {exits} {, and} {,};
-    #replace {exits} { and} {,};
-    #replace {exits} {.} {};
-    #replace {exits} { } {};
-    #replace {exits} {,} {;};
+    #variable {everything} {%0};
+    #replace {everything} {"} {''};
+    #script {res} {python splitroom.py "$everything"};
+    #variable {roomname} {$res[1]};
+    #variable {roomdesc} {$res[2]};
+    #variable {exits} {$res[3]};
+    #replace {exits} {=} {;};
     #map {info} {save};
     #math {newvroom} {$info[map][ROOMS] + 1};
     #map get roomvnum oldvnum;
@@ -71,5 +69,6 @@
         };
       };
     };
-  }
+  };
+  #variable {moving} {0}; 
 }
