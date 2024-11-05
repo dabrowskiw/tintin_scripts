@@ -50,11 +50,18 @@
     #variable {mtr} {$mapinfo[exits][$direction]};
     #if { {$mtr} != {}} {
       #map goto {$mtr};
+      #map get roomcolor roomcolor;
+      #if { {$roomcolor} == <bbb> } {
+        #map set {roomdesc} {$roomdesc};
+        #map set {roomname} {$roomname};
+        #map set {roomcolor} <fff>
+      };
     };#else {
       #map dig {$direction} {$newvroom};
       #map goto {$newvroom};
       #map set {roomdesc} {$roomdesc};
       #map set {roomname} {$roomname};
+      #map set {roomcolor} <fff>
     };
     #foreach {$exits} {exit} {
       #if { {$exit} == {$directions[$direction]} } {
