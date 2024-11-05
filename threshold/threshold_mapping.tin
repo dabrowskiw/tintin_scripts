@@ -1,0 +1,75 @@
+#nop #map read threshold.map
+#map create 1000
+#map goto 1
+#map flag static
+#map flag nofollow
+#split 0 1 0 -80
+#map offset 1 81 -4 -1
+#map flag vtmap on
+
+#action {You cannot go that way.} {#map undo}
+#ticker {mapsave} {#map write threshold.map} {20}
+
+#variable {directions} {{north}{south} {south}{north} {east}{west} {west}{east}}
+#pathdir {north} {south} {1}
+#pathdir {south} {north} {4}
+#pathdir {west} {east} {8}
+#pathdir {east} {west} {2}
+
+#alias {n} {g north}
+#alias {s} {g south}
+#alias {w} {g west}
+#alias {e} {g east}
+#alias {nw} {g northwest}
+#alias {ne} {g northeast}
+#alias {sw} {g southwest}
+#alias {se} {g southeast}
+
+#alias {g} {
+  #showme {going %0};
+  #variable {moving} {1}; 
+  #variable {direction} {%0}; 
+  go %0;
+  #showme {gone %0};
+}
+
+#variable {moving} {0};
+
+#act {~\e[38;%d;%dm%1\e[0m{([^\0]*?)}{Obvious exits are |The only obvious exits are }{(.*?)}\n} {
+  #if {$moving == 1} {
+    #variable {roomname} {%1};
+    #variable {roomdesc} {%2};
+    #variable {exits} {%4};
+    #replace {exits} {, and} {,};
+    #replace {exits} { and} {,};
+    #replace {exits} {.} {};
+    #replace {exits} { } {};
+    #replace {exits} {,} {;};
+    #map {info} {save};
+    #math {newvroom} {$info[map][ROOMS] + 1};
+    #map get roomvnum oldvnum;
+    #map get all {mapinfo};
+    #variable {mtr} {$mapinfo[exits][$direction]};
+    #if { {$mtr} != {}} {
+      #map goto {$mtr};
+    };#else {
+      #map dig {$direction} {$newvroom};
+      #map goto {$newvroom};
+      #map set {roomdesc} {$roomdesc};
+      #map set {roomname} {$roomname};
+    };
+    #foreach {$exits} {exit} {
+      #if { {$exit} == {$directions[$direction]} } {
+        #map dig {$directions[$direction]} {$oldvnum};
+      };#else {
+        #map get all {mapinfo};
+        #variable {mtr} {$mapinfo[exits][$exit]};
+        #if { {$mtr} == {}} {
+          #math {newvroom} {$newvroom + 1};
+          #map dig {$exit} {$newvroom};
+          #map set roomcolor {<bbb>} {$newvroom};
+        };
+      };
+    };
+  }
+}

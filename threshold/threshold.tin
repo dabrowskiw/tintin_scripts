@@ -1,0 +1,6 @@
+#read secrets.tin
+#session cogg thresholdrpg.com 3333
+#delay 0.5 $name
+#delay 0.5 $pass
+
+#read threshold_mapping.tin
